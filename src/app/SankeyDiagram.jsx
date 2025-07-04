@@ -1,6 +1,7 @@
 'use client';
 import React from "react";
 import { Sankey, Tooltip, ResponsiveContainer } from "recharts";
+import { useTheme } from 'next-themes';
 
 // Example data: Donor -> Issue Pool -> Candidate
 const data = {
@@ -31,52 +32,55 @@ const scale = (value) => {
   return minThickness + ((value - minValue) / (maxValue - minValue)) * (maxThickness - minThickness);
 };
 
-function renderLink({ sourceX, targetX, sourceY, targetY, payload, index }) {
-  const color = linkColors[index % linkColors.length];
-  const path = `M${sourceX},${sourceY}C${(sourceX + targetX) / 2},${sourceY} ${(sourceX + targetX) / 2},${targetY} ${targetX},${targetY}`;
-  // Defensive: fallback label if missing
-  let label = payload && payload.label;
-  if (!label && payload && typeof payload.source === 'number' && typeof payload.target === 'number') {
-    const sourceName = data.nodes[payload.source]?.name || payload.source;
-    const targetName = data.nodes[payload.target]?.name || payload.target;
-    label = `${sourceName} → ${targetName} ($${payload.value})`;
+export default function SankeyDiagram() {
+  const { resolvedTheme } = useTheme();
+  const labelColor = resolvedTheme === 'dark' ? '#eee' : '#333';
+
+  function renderLink({ sourceX, targetX, sourceY, targetY, payload, index }) {
+    const color = linkColors[index % linkColors.length];
+    const path = `M${sourceX},${sourceY}C${(sourceX + targetX) / 2},${sourceY} ${(sourceX + targetX) / 2},${targetY} ${targetX},${targetY}`;
+    // Defensive: fallback label if missing
+    let label = payload && payload.label;
+    if (!label && payload && typeof payload.source === 'number' && typeof payload.target === 'number') {
+      const sourceName = data.nodes[payload.source]?.name || payload.source;
+      const targetName = data.nodes[payload.target]?.name || payload.target;
+      label = `${sourceName} → ${targetName} ($${payload.value})`;
+    }
+    // Use scaled thickness based on value
+    const scaledWidth = scale(payload.value);
+    return (
+      <g key={index}>
+        <path d={path} stroke={color} strokeWidth={scaledWidth} fill="none" opacity={0.6} />
+        {label && (
+          <text x={(sourceX + targetX) / 2} y={(sourceY + targetY) / 2 - 5} fontSize="12" fill={labelColor} textAnchor="middle">
+            {label}
+          </text>
+        )}
+      </g>
+    );
   }
-  // Use scaled thickness based on value
-  const scaledWidth = scale(payload.value);
-  return (
-    <g key={index}>
-      <path d={path} stroke={color} strokeWidth={scaledWidth} fill="none" opacity={0.6} />
-      {label && (
-        <text x={(sourceX + targetX) / 2} y={(sourceY + targetY) / 2 - 5} fontSize="12" fill="black" textAnchor="middle">
+
+  // Custom node renderer to add labels
+  function renderNode({ x, y, width, height, index, payload }) {
+    const node = data.nodes[index];
+    const label = node.label || node.name; // Use label if available, fallback to name
+    return (
+      <g key={index}>
+        <rect x={x} y={y} width={width} height={height} fill="#8884d8" fillOpacity={0.3} rx={5} ry={5} />
+        <text
+          x={x + width / 2}
+          y={y + height + 20} // Place label below the node
+          fontSize="14"
+          fill={labelColor}
+          textAnchor="middle"
+          dominantBaseline="middle"
+        >
           {label}
         </text>
-      )}
-    </g>
-  );
-}
+      </g>
+    );
+  }
 
-// Custom node renderer to add labels
-function renderNode({ x, y, width, height, index, payload }) {
-  const node = data.nodes[index];
-  const label = node.label || node.name; // Use label if available, fallback to name
-  return (
-    <g key={index}>
-      <rect x={x} y={y} width={width} height={height} fill="#8884d8" fillOpacity={0.3} rx={5} ry={5} />
-      <text
-        x={x + width / 2}
-        y={y + height + 20} // Place label below the node
-        fontSize="14"
-        fill="#333"
-        textAnchor="middle"
-        dominantBaseline="middle"
-      >
-        {label}
-      </text>
-    </g>
-  );
-}
-
-export default function SankeyDiagram() {
   return (
     <div style={{ width: "100%" }}>
       <ResponsiveContainer minHeight={500}>

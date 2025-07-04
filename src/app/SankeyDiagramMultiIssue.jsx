@@ -1,6 +1,7 @@
 'use client';
 import React from "react";
 import { Sankey, Tooltip, ResponsiveContainer } from "recharts";
+import { useTheme } from 'next-themes';
 
 // Multi-issue, multi-jurisdiction example data
 const data = {
@@ -77,32 +78,35 @@ function getProportionalWidth(value) {
   );
 }
 
-function renderLink({ sourceX, targetX, sourceY, targetY, payload, index }) {
-  const color = linkColors[index % linkColors.length];
-  const path = `M${sourceX},${sourceY}C${(sourceX + targetX) / 2},${sourceY} ${(sourceX + targetX) / 2},${targetY} ${targetX},${targetY}`;
-  // Defensive: fallback label if missing
-  let label = payload && payload.label;
-  if (!label && payload && typeof payload.source === 'number' && typeof payload.target === 'number') {
-    // Try to use node names if available
-    const sourceName = data.nodes[payload.source]?.name || payload.source;
-    const targetName = data.nodes[payload.target]?.name || payload.target;
-    label = `${sourceName} → ${targetName} ($${payload.value})`;
-  }
-  // Proportional width based on value
-  const proportionalWidth = getProportionalWidth(payload.value);
-  return (
-    <g key={index}>
-      <path d={path} stroke={color} strokeWidth={proportionalWidth} fill="none" opacity={0.6} />
-      {label && (
-        <text x={(sourceX + targetX) / 2} y={(sourceY + targetY) / 2 - 5} fontSize="11" fill="black" textAnchor="middle">
-          {label}
-        </text>
-      )}
-    </g>
-  );
-}
-
 export default function SankeyDiagramMultiIssue() {
+  const { resolvedTheme } = useTheme();
+  const labelColor = resolvedTheme === 'dark' ? '#eee' : '#333';
+
+  function renderLink({ sourceX, targetX, sourceY, targetY, payload, index }) {
+    const color = linkColors[index % linkColors.length];
+    const path = `M${sourceX},${sourceY}C${(sourceX + targetX) / 2},${sourceY} ${(sourceX + targetX) / 2},${targetY} ${targetX},${targetY}`;
+    // Defensive: fallback label if missing
+    let label = payload && payload.label;
+    if (!label && payload && typeof payload.source === 'number' && typeof payload.target === 'number') {
+      // Try to use node names if available
+      const sourceName = data.nodes[payload.source]?.name || payload.source;
+      const targetName = data.nodes[payload.target]?.name || payload.target;
+      label = `${sourceName} → ${targetName} ($${payload.value})`;
+    }
+    // Proportional width based on value
+    const proportionalWidth = getProportionalWidth(payload.value);
+    return (
+      <g key={index}>
+        <path d={path} stroke={color} strokeWidth={proportionalWidth} fill="none" opacity={0.6} />
+        {label && (
+          <text x={(sourceX + targetX) / 2} y={(sourceY + targetY) / 2 - 5} fontSize="11" fill={labelColor} textAnchor="middle">
+            {label}
+          </text>
+        )}
+      </g>
+    );
+  }
+
   return (
     <div style={{ width: "100%" }}>
       <ResponsiveContainer minHeight={1000}>
