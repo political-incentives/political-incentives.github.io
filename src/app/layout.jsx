@@ -9,20 +9,20 @@ export const metadata = {
   // Define your metadata here
   // For more information on metadata API, see: https://nextjs.org/docs/app/building-your-application/optimizing/metadata
   title: {
-    template: '%s - Nextra'
+    template: '%s'
   },
-  description: 'Nextra: the Next.js site builder',
-  applicationName: 'Nextra',
+  description: 'Issue-Based Political Donations',
+  applicationName: 'Issue-Based Political Donations',
   generator: 'Next.js',
   appleWebApp: {
-    title: 'Nextra'
+    title: 'Issue-Based Political Donations'
   },
   other: {
     'msapplication-TileImage': '/ms-icon-144x144.png',
     'msapplication-TileColor': '#fff'
   },
   twitter: {
-    site: 'https://nextra.site'
+    site: 'https://political-incentives.github.io/'
   }
 }
 
@@ -33,7 +33,7 @@ const navbar = (
     // ... Your additional navbar options
   />
 )
-const footer = <Footer>MIT {new Date().getFullYear()} © Nextra.</Footer>
+const footer = <Footer>MIT {new Date().getFullYear()} © Michael McCord.</Footer>
 
 export default async function RootLayout({ children }) {
   const pageMap = await getPageMap();

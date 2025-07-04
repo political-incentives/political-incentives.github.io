@@ -6,17 +6,17 @@ import { useTheme } from 'next-themes';
 // Example data: Donor -> Issue Pool -> Candidate
 const data = {
   nodes: [
-    { name: "Donor: Alice", label: "Alice" },
-    { name: "Donor: Bob", label: "Bob" },
-    { name: "Issue Pool: Constitutional Carry (WY)", label: "Constitutional Carry (WY)" },
-    { name: "Candidate A", label: "Candidate A" },
-    { name: "Candidate B", label: "Candidate B" }
+    { name: "Donor: Alice", label: "Alice", key: "donor-alice" },
+    { name: "Donor: Bob", label: "Bob", key: "donor-bob" },
+    { name: "Issue Pool: Constitutional Carry (WY)", label: "Constitutional Carry (WY)", key: "pool-cc-wy" },
+    { name: "Candidate A", label: "Candidate A", key: "candidate-a" },
+    { name: "Candidate B", label: "Candidate B", key: "candidate-b" }
   ],
   links: [
-    { source: 0, target: 2, value: 300, label: "Alice → Issue Pool ($300)" }, // Alice to Issue Pool
-    { source: 1, target: 2, value: 200, label: "Bob → Issue Pool ($200)" }, // Bob to Issue Pool
-    { source: 2, target: 3, value: 350, label: "Pool → Candidate A ($350)" }, // Pool to Candidate A
-    { source: 2, target: 4, value: 150, label: "Pool → Candidate B ($150)" }  // Pool to Candidate B
+    { source: 0, target: 2, value: 300, label: "Alice → Issue Pool ($300)", key: "0-2" }, // Alice to Issue Pool
+    { source: 1, target: 2, value: 200, label: "Bob → Issue Pool ($200)", key: "1-2" }, // Bob to Issue Pool
+    { source: 2, target: 3, value: 350, label: "Pool → Candidate A ($350)", key: "2-3" }, // Pool to Candidate A
+    { source: 2, target: 4, value: 150, label: "Pool → Candidate B ($150)", key: "2-4" }  // Pool to Candidate B
   ]
 };
 
@@ -48,8 +48,9 @@ export default function SankeyDiagram() {
     }
     // Use scaled thickness based on value
     const scaledWidth = scale(payload.value);
+    // Remove key from <g>
     return (
-      <g key={index}>
+      <g>
         <path d={path} stroke={color} strokeWidth={scaledWidth} fill="none" opacity={0.6} />
         {label && (
           <text x={(sourceX + targetX) / 2} y={(sourceY + targetY) / 2 - 5} fontSize="12" fill={labelColor} textAnchor="middle">
@@ -64,8 +65,9 @@ export default function SankeyDiagram() {
   function renderNode({ x, y, width, height, index, payload }) {
     const node = data.nodes[index];
     const label = node.label || node.name; // Use label if available, fallback to name
+    // Remove key from <g>
     return (
-      <g key={index}>
+      <g>
         <rect x={x} y={y} width={width} height={height} fill="#8884d8" fillOpacity={0.3} rx={5} ry={5} />
         <text
           x={x + width / 2}
