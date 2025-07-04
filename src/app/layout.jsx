@@ -33,7 +33,23 @@ const navbar = (
     // ... Your additional navbar options
   />
 )
-const footer = <Footer>MIT {new Date().getFullYear()} © Michael McCord.</Footer>
+const footer = (
+  <Footer>
+    <a href="license/LICENSE.txt" target="_blank" rel="noopener noreferrer">
+    <img
+      src="images/by-nc-sa.png"
+      alt="CC BY-NC-SA"
+      style={{
+        height: 20,
+        verticalAlign: 'middle',
+        marginRight: 8
+      }}
+    />
+    </a>
+    <a href="license/LICENSE.txt" target="_blank" rel="noopener noreferrer">CC BY-NC-SA 4.0 {new Date().getFullYear()} © Michael McCord.</a>
+    
+  </Footer>
+)
 
 export default async function RootLayout({ children }) {
   const pageMap = await getPageMap();
