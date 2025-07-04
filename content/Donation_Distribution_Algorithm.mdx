@@ -110,31 +110,40 @@ where $C_k$ is candidates in jurisdiction $k$, and $O_{j,k}(t) \leq K_{j,k}^{\te
 
 ## 4. Algorithm Pseudocode
 
-```plaintext
-for each leaf issue v in L:
-    compute P_v(t) = sum(δ_{j,v}(t))
-    let C_v(t) = {c_i | v in S(c_i)}
-    for each c_i in C_v(t):
-        compute R_{i,v}(t) = {d_j in J(c_i) | r_{i,j,v}(t) exists}
-        compute \bar{r}_{i,v}(t) = avg(r_{i,j,v}(t)) if R_{i,v}(t) ≠ ∅, else 0
-    compute R_v(t) = sum(\bar{r}_{i,v}(t))
-    for each c_i in C_v(t):
-        p_{i,v}(t) = \bar{r}_{i,v}(t) / R_v(t) if R_v(t) > 0, else 0
-        A_{i,v}(t) = p_{i,v}(t) * P_v(t)
-    for each c_i in C_v(t):
-        for each d_j in D with δ_{j,v}(t) > 0:
-            a_{j,i,v}(t) = δ_{j,v}(t) * p_{i,v}(t)
-            if D_{j,i}(t-1) + a_{j,i,v}(t) > K_{j,i}:
-                e_{j,i,v}(t) = D_{j,i}(t-1) + a_{j,i,v}(t) - K_{j,i}
-                a'_{j,i,v}(t) = a_{j,i,v}(t) - e_{j,i,v}(t)
-                if d_j chooses refund:
-                    return e_{j,i,v}(t) to d_j
-                else:
-                    δ_{j,parent(v)}(t) += e_{j,i,v}(t)
-        A'_{i,v}(t) = sum(a'_{j,i,v}(t))
-    update D_{j,i}(t) for all d_j, c_i
-for each non-leaf issue v with updated δ_{j,v}(t):
-    propagate funds upward or to leaf descendants
+```math
+\begin{align*}
+&\textbf{For each leaf issue } v \in L:\\
+&\quad P_v(t) = \sum_j \delta_{j,v}(t) \\
+&\quad C_v(t) = \{c_i \mid v \in S(c_i)\} \\
+&\quad \textbf{For each } c_i \in C_v(t):\\
+&\qquad R_{i,v}(t) = \{d_j \in J(c_i) \mid r_{i,j,v}(t) \text{ exists}\} \\
+&\qquad \bar{r}_{i,v}(t) =
+    \begin{cases}
+        \text{avg}(r_{i,j,v}(t)), & \text{if } R_{i,v}(t) \neq \emptyset \\
+        0, & \text{otherwise}
+    \end{cases} \\
+&\quad R_v(t) = \sum_{c_i \in C_v(t)} \bar{r}_{i,v}(t) \\
+&\quad \textbf{For each } c_i \in C_v(t):\\
+&\qquad p_{i,v}(t) =
+    \begin{cases}
+        \frac{\bar{r}_{i,v}(t)}{R_v(t)}, & \text{if } R_v(t) > 0 \\
+        0, & \text{otherwise}
+    \end{cases} \\
+&\qquad A_{i,v}(t) = p_{i,v}(t) \cdot P_v(t) \\
+&\quad \textbf{For each } c_i \in C_v(t):\\
+&\qquad \textbf{For each } d_j \in D \text{ with } \delta_{j,v}(t) > 0:\\&\qquad\quad a_{j,i,v}(t) = \delta_{j,v}(t) \cdot p_{i,v}(t) \\
+&\qquad\quad \textbf{If } D_{j,i}(t-1) + a_{j,i,v}(t) > K_{j,i}:\\
+&\qquad\qquad e_{j,i,v}(t) = D_{j,i}(t-1) + a_{j,i,v}(t) - K_{j,i} \\
+&\qquad\qquad a'_{j,i,v}(t) = a_{j,i,v}(t) - e_{j,i,v}(t) \\
+&\qquad\qquad \textbf{If donor chooses refund:}\\
+&\qquad\qquad\quad \text{return } e_{j,i,v}(t) \text{ to } d_j \\
+&\qquad\qquad \textbf{Else:}\\
+&\qquad\qquad\quad \delta_{j,\text{parent}(v)}(t) \mathrel{+}= e_{j,i,v}(t) \\
+&\qquad A'_{i,v}(t) = \sum_j a'_{j,i,v}(t) \\
+&\quad \text{Update } D_{j,i}(t) \text{ for all } d_j, c_i \\
+&\textbf{For each non-leaf issue } v \text{ with updated } \delta_{j,v}(t):\\
+&\quad \text{Propagate funds upward or to leaf descendants}
+\end{align*}
 ```
 
 ## 5. Edge Cases
