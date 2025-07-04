@@ -1,3 +1,5 @@
+import SankeyDiagram from '../src/app/SankeyDiagram'
+
 # A Novel Issue-Based Political Donation System
 
 ## Executive Summary
@@ -69,11 +71,14 @@ The platform is a secure, cloud-based application with the following components:
    - **Mitigation**: Launch targeted outreach campaigns highlighting the platform’s benefits, with initial focus on high-profile disruptive candidates to build momentum.
 
 ## Use Case Example
+
 Consider a donor in Wyoming who supports constitutional carry. They log into the platform, navigate to the issue tree, and select the leaf node “Enshrining constitutional carry in Wyoming’s state constitution.” They donate $500 and rate two candidates running for state legislature who have subscribed to this issue:
 - Candidate A: Rated 8/10 (strong public support for the issue).
 - Candidate B: Rated 4/10 (lukewarm commitment).
 
-The $500 is pooled with other donations to this issue. At the end of the month, Candidate A’s higher rating results in them receiving 70% of the pool ($350), while Candidate B receives 30% ($150). The platform ensures the donor’s total contributions to each candidate remain under Wyoming’s donation caps. If the donor reaches a cap for Candidate A, they can redirect excess funds to the parent issue “Second Amendment rights,” supporting candidates in other states.
+The \$500 is pooled with other donations to this issue. At the end of the month, Candidate A’s higher rating results in them receiving 70% of the pool (\$350), while Candidate B receives 30% (\$150). The platform ensures the donor’s total contributions to each candidate remain under Wyoming’s donation caps. If the donor reaches a cap for Candidate A, they can redirect excess funds to the parent issue “Second Amendment rights,” supporting candidates in other states.
+
+<SankeyDiagram />
 
 ## Legal and Regulatory Considerations
 The platform must comply with:
