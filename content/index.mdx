@@ -1,4 +1,5 @@
 import SankeyDiagram from '../src/app/SankeyDiagram'
+import SankeyDiagramMultiIssue from '../src/app/SankeyDiagramMultiIssue'
 
 # A Novel Issue-Based Political Donation System
 
@@ -79,6 +80,39 @@ Consider a donor in Wyoming who supports constitutional carry. They log into the
 The \$500 is pooled with other donations to this issue. At the end of the month, Candidate A’s higher rating results in them receiving 70% of the pool (\$350), while Candidate B receives 30% (\$150). The platform ensures the donor’s total contributions to each candidate remain under Wyoming’s donation caps. If the donor reaches a cap for Candidate A, they can redirect excess funds to the parent issue “Second Amendment rights,” supporting candidates in other states.
 
 <SankeyDiagram />
+
+## Use Case Example: Multi-Issue, Multi-Jurisdiction Scenario
+
+A group of donors across the United States want to support a range of issues at both national and local levels. The issues are:
+
+1. **Universal Healthcare (National)**
+2. **Renewable Energy Expansion (California)**
+3. **School Choice (Texas)**
+4. **Criminal Justice Reform (Illinois)**
+5. **Affordable Housing (New York City)**
+6. **Broadband Access (Rural Appalachia)**
+
+Each donor selects one or more issues and makes monthly contributions:
+
+- **Donor 1 (CA):** \$200 to Renewable Energy Expansion, \$100 to Universal Healthcare
+- **Donor 2 (TX):** \$150 to School Choice, \$50 to Universal Healthcare
+- **Donor 3 (NY):** \$300 to Affordable Housing, \$100 to Universal Healthcare
+- **Donor 4 (IL):** \$120 to Criminal Justice Reform, \$80 to Universal Healthcare
+- **Donor 5 (WV):** \$100 to Broadband Access, \$50 to Universal Healthcare
+- **Donor 6 (CA):** \$100 to Renewable Energy Expansion, \$50 to Universal Healthcare
+
+Each issue pool is distributed monthly to candidates who have subscribed to that issue, based on donor ratings:
+
+- In **California**, two candidates for state office are subscribed to Renewable Energy Expansion. Donors rate Candidate X (8/10) and Candidate Y (6/10). The \$300 pool is split 57% (\$171) to X and 43% (\$129) to Y.
+- In **Texas**, three candidates are subscribed to School Choice. Donors rate them 9/10, 7/10, and 4/10. The \$150 pool is split proportionally.
+- In **New York City**, two city council candidates are subscribed to Affordable Housing. Donors rate them 10/10 and 5/10. The \$300 pool is split 67% (\$201) and 33% (\$99).
+- In **Illinois**, one candidate is subscribed to Criminal Justice Reform and receives the full \$120 pool, subject to cap compliance.
+- In **Rural Appalachia**, two candidates are subscribed to Broadband Access. Donors rate them 7/10 and 3/10. The \$100 pool is split 70% (\$70) and 30% (\$30).
+- The **Universal Healthcare** pool (\$430) is distributed among all subscribed federal candidates, with donor ratings determining the split.
+
+If any donor’s contribution to a candidate exceeds legal caps, the platform automatically offers a refund or redirects the excess to the parent issue (e.g., from "Affordable Housing (NYC)" to "Affordable Housing (NY)"). All transactions are tracked for compliance and transparency.
+
+<SankeyDiagramMultiIssue />
 
 ## Legal and Regulatory Considerations
 The platform must comply with:

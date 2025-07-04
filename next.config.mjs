@@ -13,6 +13,7 @@ const withNextra = nextra({
 
 var outputConfig = withNextra({
     root: '.',
+    output: 'export', // Enable static export for GitHub Pages
     // webpack: {
     //     resolve: {
     //         alias: {

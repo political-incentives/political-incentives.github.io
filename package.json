@@ -13,8 +13,10 @@
 	"scripts": {
 		"dev": "next --turbopack",
 		"build": "next build",
+		"export": "next export",
 		"start": "next start",
-		"postbuild": "pagefind --site .next/server/app --output-path public/_pagefind"
+		"postbuild": "pagefind --site .next/server/app --output-path public/_pagefind",
+		"deploy": "pnpm build && pnpm export"
 	},
 	"devDependencies": {
 		"pagefind": "^1.3.0"
