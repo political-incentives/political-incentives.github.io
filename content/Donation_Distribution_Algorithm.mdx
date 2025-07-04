@@ -1,0 +1,155 @@
+# Mathematical Description of the Issue-Based Donation Distribution Algorithm
+
+## Abstract
+
+This paper formalizes the donation distribution algorithm for an issue-based political donation platform. Donors contribute to specific issues, and funds are allocated monthly to candidates based on donor ratings. The algorithm ensures equitable distribution, compliance with campaign finance laws, and handles donation caps. We define the system’s components, describe the distribution process, and address edge cases like cap violations and fund redirection.
+
+## 1. Introduction
+
+The donation platform organizes issues in a tree structure, where donors fund specific (leaf) or general (root) issues. Candidates subscribe to leaf issues, and donors rate them monthly on a 1–10 scale. Funds are distributed proportionally based on ratings, adhering to federal and state donation caps. This paper mathematically describes the algorithm, covering rating aggregation, fund allocation, and compliance.
+
+## 2. System Components and Notation
+
+### 2.1. Definitions
+
+- **Issues**: Organized in a tree $T = (V, E)$, where $V$ is the set of issue nodes, and $E$ represents parent-child edges. Leaf nodes $L \subset V$ are specific issues; non-leaf nodes are generic.
+- **Candidates**: Set $C = \{c_1, c_2, \ldots, c_m\}$, where candidates subscribe to leaf issues.
+- **Donors**: Set $D = \{d_1, d_2, \ldots, d_n\}$, contributing to issues and rating candidates in their jurisdiction.
+- **Jurisdiction**: For candidate $c_i$, jurisdiction $J(c_i) \subseteq D$ is the set of eligible donors (e.g., residents of the candidate’s district).
+- **Donation Pool**: For issue $v \in V$, the pool $P_v(t)$ at month $ t $ is the total donations to $ v $.
+- **Ratings**: For candidate $c_i$ on issue $v$, donor $d_j \in J(c_i)$ assigns $r_{i,j,v}(t) \in \{1, 2, \ldots, 10\}$ at month $t$.
+- **Donation Caps**: For donor $d_j$ and candidate $c_i$, cap $K_{j,i}$ (e.g., $3,300 per cycle for federal candidates in 2025) limits contributions.
+
+### 2.2. Subscription Function
+
+Define $S: C \to 2^L$, mapping each candidate to their subscribed leaf issues. For $c_i$, $S(c_i) \subseteq L$. Constraint:
+
+$$ S(c_i) \cap (V \setminus L) = \emptyset $$
+
+### 2.3. Donation Function
+
+For donor $d_j$, donation to issue $v \in V$ at month $t$ is $\delta_{j,v}(t) \geq 0$. Total pool:
+
+$$ P_v(t) = \sum_{d_j \in D} \delta_{j,v}(t) $$
+
+## 3. Donation Distribution Algorithm
+
+The algorithm distributes $P_v(t)$ for each leaf issue $v \in L$ monthly, based on candidate ratings, with cap enforcement.
+
+### 3.1. Rating Aggregation
+
+For candidate $c_i \in C$ subscribed to $v \in S(c_i)$, let $R_{i,v}(t) \subseteq J(c_i)$ be donors rating $c_i$ on $v$ at $t$. Average rating:
+
+```math
+\bar{r}_{i,v}(t) = \begin{cases} 
+\frac{1}{|R_{i,v}(t)|} \sum_{d_j \in R_{i,v}(t)} r_{i,j,v}(t) & \text{if } R_{i,v}(t) \neq \emptyset \\
+0 & \text{if } R_{i,v}(t) = \emptyset 
+\end{cases}
+```
+
+Constraint: Donors must rate all applicable candidates to donate:
+
+$$ \delta_{j,v}(t) > 0 \implies d_j \in R_{i,v}(t) \quad \forall c_i \text{ s.t. } v \in S(c_i), d_j \in J(c_i) $$
+
+### 3.2. Proportional Allocation
+
+Let $C_v(t) = \{ c_i \in C \mid v \in S(c_i) \}$ be candidates subscribed to $v$. Total rating sum:
+
+$$ R_v(t) = \sum_{c_i \in C_v(t)} \bar{r}_{i,v}(t) $$
+
+Proportion for candidate $c_i$:
+
+```math
+p_{i,v}(t) = \begin{cases} 
+\frac{\bar{r}_{i,v}(t)}{R_v(t)} & \text{if } R_v(t) > 0 \\
+0 & \text{if } R_v(t) = 0 
+\end{cases}
+```
+
+Initial allocation:
+
+$$ A_{i,v}(t) = p_{i,v}(t) \cdot P_v(t) $$
+
+### 3.3. Cap Enforcement
+
+Track cumulative donations from $d_j$ to $c_i$ up to $t$:
+
+$$ D_{j,i}(t) = \sum_{s=1}^t \sum_{v \in S(c_i)} \delta_{j,v}(s) \cdot p_{i,v}(s) $$
+
+For $A_{i,v}(t)$, donor contribution:
+
+$$ a_{j,i,v}(t) = \delta_{j,v}(t) \cdot p_{i,v}(t) $$
+
+If $D_{j,i}(t-1) + a_{j,i,v}(t) > K_{j,i}$, adjust:
+
+1. **Excess**:
+
+   $$ e_{j,i,v}(t) = \max(0, D_{j,i}(t-1) + a_{j,i,v}(t) - K_{j,i}) $$
+
+2. **Adjusted Contribution**:
+
+   $$ a'_{j,i,v}(t) = a_{j,i,v}(t) - e_{j,i,v}(t) $$
+
+3. **Total Adjusted Allocation**:
+
+   $$ A'_{i,v}(t) = \sum_{d_j \in D} a'_{j,i,v}(t) $$
+
+4. **Excess Handling**:
+   - Refund: Return $e_{j,i,v}(t)$ to $d_j$.
+   - Redirect: Add to parent issue:
+
+     $$ \delta_{j,\text{parent}(v)}(t) \gets \delta_{j,\text{parent}(v)}(t) + e_{j,i,v}(t) $$
+
+### 3.4. Redistribution to Parent Issues
+
+Redirected funds to $\text{parent}(v)$ are reallocated. If $\text{parent}(v) \in L$, distribute among $C_{\text{parent}(v)}(t)$. If $\text{parent}(v) \notin L$, propagate upward. Track out-of-jurisdiction caps:
+
+$$ O_{j,k}(t) = \sum_{s=1}^t \sum_{v \in V} \sum_{c_i \in C_v(s) \cap C_k} a'_{j,i,v}(s) $$
+
+where $C_k$ is candidates in jurisdiction $k$, and $O_{j,k}(t) \leq K_{j,k}^{\text{out}}$.
+
+## 4. Algorithm Pseudocode
+
+```plaintext
+for each leaf issue v in L:
+    compute P_v(t) = sum(δ_{j,v}(t))
+    let C_v(t) = {c_i | v in S(c_i)}
+    for each c_i in C_v(t):
+        compute R_{i,v}(t) = {d_j in J(c_i) | r_{i,j,v}(t) exists}
+        compute \bar{r}_{i,v}(t) = avg(r_{i,j,v}(t)) if R_{i,v}(t) ≠ ∅, else 0
+    compute R_v(t) = sum(\bar{r}_{i,v}(t))
+    for each c_i in C_v(t):
+        p_{i,v}(t) = \bar{r}_{i,v}(t) / R_v(t) if R_v(t) > 0, else 0
+        A_{i,v}(t) = p_{i,v}(t) * P_v(t)
+    for each c_i in C_v(t):
+        for each d_j in D with δ_{j,v}(t) > 0:
+            a_{j,i,v}(t) = δ_{j,v}(t) * p_{i,v}(t)
+            if D_{j,i}(t-1) + a_{j,i,v}(t) > K_{j,i}:
+                e_{j,i,v}(t) = D_{j,i}(t-1) + a_{j,i,v}(t) - K_{j,i}
+                a'_{j,i,v}(t) = a_{j,i,v}(t) - e_{j,i,v}(t)
+                if d_j chooses refund:
+                    return e_{j,i,v}(t) to d_j
+                else:
+                    δ_{j,parent(v)}(t) += e_{j,i,v}(t)
+        A'_{i,v}(t) = sum(a'_{j,i,v}(t))
+    update D_{j,i}(t) for all d_j, c_i
+for each non-leaf issue v with updated δ_{j,v}(t):
+    propagate funds upward or to leaf descendants
+```
+
+## 5. Edge Cases
+
+- **No Ratings**: If $R_v(t) = 0$, hold $P_v(t)$ or redistribute upward.
+- **Single Candidate**: If $|C_v(t)| = 1$, allocate $A_{i,v}(t) = P_v(t)$, subject to caps.
+- **Tied Ratings**: If $\bar{r}_{i,v}(t) = \bar{r}_{j,v}(t)$, split funds equally.
+- **Cross-Issue Caps**: Track $D_{j,i}(t)$ across issues to avoid violations.
+
+## 6. Compliance and Reporting
+
+- Generate reports detailing $A'_{i,v}(t)$ and donor sources.
+- File with FEC and state commissions.
+- Ensure $D_{j,i}(t) \leq K_{j,i}$ and $O_{j,k}(t) \leq K_{j,k}^{\text{out}}$.
+
+## 7. Conclusion
+
+The algorithm ensures transparent, compliant fund allocation based on donor ratings. It supports issue-driven campaigns while navigating regulatory complexity. Future enhancements include optimizing scalability and adding anomaly detection for rating integrity.
